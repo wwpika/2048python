@@ -25,6 +25,7 @@ def transpose(field):
 def invert(field):
     return [row[::-1] for row in field] #[::-1]将列表或字符倒过来
 
+#创建棋盘，初始化棋盘的参数
 class GameField(object):
     def __init__(self, height=4, width=4, win=2048):
         self.height = height
@@ -38,18 +39,20 @@ class GameField(object):
         if self.score > self.highscore:
             self.highscore = self.score
         self.score = 0
+        #field代表一个(x,y)坐标对应的一个方格,将所有方格的数值设置为0
         self.field = [[0 for i in range(self.width)] for j in range(self.height)]
         self.spawn()
         self.spawn()
 
     def move(self, direction):
+        #一行向左合并
         def move_row_left(row):
-            def tighten(row): # squeese non-zero elements together
+            def tighten(row): #把零散的非零单元挤都一块
                 new_row = [i for i in row if i != 0]
                 new_row += [0 for i in range(len(row) - len(new_row))]
                 return new_row
 
-            def merge(row):
+            def merge(row): #对邻近元素进行合并
                 pair = False
                 new_row = []
                 for i in range(len(row)):
@@ -65,8 +68,10 @@ class GameField(object):
                             new_row.append(row[i])
                 assert len(new_row) == len(row)
                 return new_row
+            #先挤到一块再合并再挤到一块
             return tighten(merge(tighten(row)))
 
+        #通过矩阵进行转置与逆转，可以从左移得到其余三个方向的移动操作
         moves = {}
         moves['Left']  = lambda field:                              \
                 [move_row_left(row) for row in field]
@@ -86,6 +91,7 @@ class GameField(object):
                 return False
 
     def is_win(self):
+        #any():只要有任何元素不为0,'',False,就返回True
         return any(any(i >= self.win_value for i in row) for row in self.field)
 
     def is_gameover(self):
@@ -127,19 +133,25 @@ class GameField(object):
                 cast(help_string1)
         cast(help_string2)
 
+    #随机生成一个2或者4
     def spawn(self):
+        #randrange():生成一个随机数，可以指定起始范围和递增基数
         new_element = 4 if randrange(100) > 89 else 2
+        #生成一个随机的坐标
+        #choice():返回一个列表，元组或字符串的随机项
         (i,j) = choice([(i,j) for i in range(self.width) for j in range(self.height) if self.field[i][j] == 0])
         self.field[i][j] = new_element
 
+    #判断能否移动
     def move_is_possible(self, direction):
         def row_is_left_movable(row): 
-            def change(i): # true if there'll be change in i-th tile
-                if row[i] == 0 and row[i + 1] != 0: # Move
+            def change(i): 
+                if row[i] == 0 and row[i + 1] != 0: # 可以移动
                     return True
-                if row[i] != 0 and row[i + 1] == row[i]: # Merge
+                if row[i] != 0 and row[i + 1] == row[i]: # 可以合并
                     return True
                 return False
+            #不能移动，不能合并，返回的都是false
             return any(change(i) for i in range(len(row) - 1))
 
         check = {}
@@ -160,6 +172,7 @@ class GameField(object):
         else:
             return False
 
+#stdscr代表一个屏幕的对象，属于curses库
 def main(stdscr):
     def init():
         #重置游戏棋盘
@@ -209,6 +222,7 @@ def main(stdscr):
     #状态机开始循环
     while state != 'Exit':
         state = state_actions[state]()
+
 
 curses.wrapper(main)
 
