@@ -4,30 +4,35 @@ import curses
 from random import randrange, choice # generate and place new tile
 from collections import defaultdict
 
-letter_codes = [ord(ch) for ch in 'WASDRQwasdrq']
-actions = ['Up', 'Left', 'Down', 'Right', 'Restart', 'Exit']
-actions_dict = dict(zip(letter_codes, actions * 2))
+letter_codes = [ord(ch) for ch in 'WASDRQwasdrq'] #存储有效输入
+actions = ['Up', 'Left', 'Down', 'Right', 'Restart', 'Exit'] #记录用户行为
+actions_dict = dict(zip(letter_codes, actions * 2)) #生成一个字典
 
+#用户输入处理
 def get_user_action(keyboard):    
     char = "N"
     while char not in actions_dict:    
         char = keyboard.getch()
     return actions_dict[char]
 
+#矩阵转置
 def transpose(field):
-    return [list(row) for row in zip(*field)]
+    #从右向左看，先循环便利zip(*field)中的每个元素，对每个元素进行如下操作：
+    #先将其值赋给变量row，然后进行list(row)操作，最后将返回的数据追加到要返回的list中
+    return [list(row) for row in zip(*field)] 
 
+#矩阵逆转
 def invert(field):
-    return [row[::-1] for row in field]
+    return [row[::-1] for row in field] #[::-1]将列表或字符倒过来
 
 class GameField(object):
     def __init__(self, height=4, width=4, win=2048):
         self.height = height
         self.width = width
-        self.win_value = win
-        self.score = 0
-        self.highscore = 0
-        self.reset()
+        self.win_value = win #过关分数
+        self.score = 0 #当前分数
+        self.highscore = 0 #最高分
+        self.reset() #棋盘重置
 
     def reset(self):
         if self.score > self.highscore:
